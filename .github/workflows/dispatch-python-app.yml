@@ -27,4 +27,4 @@ jobs:
         BASE_URL: ${{ secrets.BASE_URL }}
         STADIUM_GROUP: ${{ secrets.STADIUM_GROUP }}
       run: |
-        echo $BASE_URL, $STADIUM_GROUP
+        python test.py
