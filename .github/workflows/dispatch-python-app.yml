@@ -3,9 +3,7 @@
 
 name: Dispatch python application
 
-on:
-  repository_dispatch:
-    types: [TRIGGER_API_TEST]
+on: workflow_dispatch
 
 permissions:
   contents: read
