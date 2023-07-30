@@ -1,55 +1,27 @@
+# pylint:disable=missing-timeout,invalid-name
+from __future__ import annotations
 import os
-import requests
+from pprint import pprint
+import json
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
-from dateutil import parser
-from pprint import pprint
-from collections import defaultdict
+import dateutil
 
 from slack import Slack
+from plab_helper import PlabHelper
 
 
 SLACK_WEBHOOK = os.environ['SLACK_WEBHOOK']
 BASE_URL = os.environ['BASE_URL']
-STADIUM_GROUP = os.environ['STADIUM_GROUP']
+STADIUM_IDS = json.loads(os.environ['STADIUM_IDS'])
 WEEKDAYS = {1, 2, 3} # 화요일, 수요일, 목요일
 START_TIME = '20:00'
 
 
-def get_stadium_group_info(stadium_group_id):
-    '''retrieve stadium gropu information'''
-    api_url = f'{BASE_URL}/api/v2/rental/stadium-groups/'
-    params = {
-        'id': f'{stadium_group_id}',
-        'date': '',
-    }
-    resp = requests.get(api_url, params=params)
-    resp_json = resp.json()
-    return resp_json['results'][0]
-
-
-def get_schedules(stadium_id, dt, start_time):
-    '''retrieve schedule info for specific stadium'''
-    api_url = f'{BASE_URL}/api/v2/rental/stadiums/{stadium_id}/products/'
-    params = {
-        'date': f'{dt}',
-    }
-    resp = requests.get(api_url, params=params)
-    resp_json = resp.json()
-    result = None
-    for sched in resp_json['results']:
-        if sched['start_time'] == start_time:
-            result = sched
-            break
-    return result
-
-
-def date_range(weekdays):
+def date_range(weekdays, days=60):
     '''date iterator'''
     now = datetime.now().date()
-    end = datetime(year=now.year, month=now.month, day=1).date() \
-        + relativedelta(months=2) \
-        - relativedelta(days=1)
+    end = now + relativedelta(days=days)
     that = now
     while that <= end:
         if weekdays and that.weekday() in weekdays:
@@ -68,33 +40,54 @@ def get_weekname(dt):
         5: '토요일',
         6: '일요일',
     }
-    return weeknames[parser.parse(dt).weekday()]
+    return weeknames[dateutil.parser.parse(dt).weekday()]
 
 
 def main():
-    # collect reserv. info.
-    results = defaultdict(dict)
-    dts = [dt for dt in date_range(WEEKDAYS)]
-    info = get_stadium_group_info(STADIUM_GROUP)
-    name = info['name']
-    for stadium in info['stadiums']:
-        for dt in dts:
-            sched = get_schedules(stadium['id'], dt, START_TIME)
-            if sched:
-                results[dt][(stadium['id'], stadium['name'])] = sched
-    # send results to slack
-    msgbuilder = list()
-    for dt in results:
-        for stadium_id, stadium_name in results[dt]:
-            sched = results[dt][(stadium_id, stadium_name)]
-            if sched['product_status'] == 'READY':
-                text = f'{stadium_name} - {dt} ({get_weekname(dt)}) 예약 가능!'
-                hyperlink = f'{BASE_URL}/rental/{sched["id"]}/order/'
-                text = f'<{hyperlink}|{text}>'
-                msgbuilder.append(text)
-    title = f'{name} 예약 가능한 구장'
+    base_url: str = os.environ['BASE_URL']
+    stadium_ids: list[int] = json.loads(os.environ['STADIUM_IDS'])
+    weekdays: set[int] = {1, 2, 3} # 화요일, 수요일, 목요일
+    start_t: str = '20:00:00'
+    slack_webhook: str = os.environ['SLACK_WEBHOOK']
+
+    helper = PlabHelper(base_url)
+
+    # get candidate stadium names
+    stadium_id2name = {stadium_id: helper.get_stadium_name(stadium_id)
+                       for stadium_id in stadium_ids}
+    pprint(stadium_id2name)
+
+    # get schedules
+    schedules = []
+    for stadium_id in stadium_ids:
+        for date in date_range(weekdays):
+            _schedules = helper.get_schedules(stadium_id=stadium_id,
+                                              date=date,
+                                              start_t=start_t)
+            schedules.extend(_schedules)
+
+    # translate
+    for sched in schedules:
+        sched['weekname'] = get_weekname(sched['date'])
+        sched['order'] = helper.get_order_url(sched['product_id'])
+    pprint(schedules)
+
+    # send to slack
+    msgbuilder = []
+    for sched in schedules:
+        stadium_full_name = sched['stadium_group_name']
+        if sched['stadium_name']:
+            stadium_full_name += ' - ' + sched['stadium_name']
+        text = f'{stadium_full_name} - {sched["date"]} ({sched["weekname"]}) '
+        text = f'<{sched["order"]}|{text}>'
+        msgbuilder.append(text)
+
+    candidates = ', '.join(stadium_id2name.values())
+    title = f'앞으로 60일 간 예약 가능한 구장 일정 ({candidates})'
     text = '\n\n'.join(msgbuilder)
-    slack = Slack(url=SLACK_WEBHOOK, username='엔살매니저', icon_emoji=':soccer:')
+    slack = Slack(url=slack_webhook,
+                  username='엔살매니저',
+                  icon_emoji=':soccer:')
     slack.send(title, text, color='good', with_hostname=False)
 
 
