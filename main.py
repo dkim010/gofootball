@@ -16,7 +16,7 @@ from plab_helper import PlabHelper
 from slack import Slack
 
 
-def date_range(weekdays, days):
+def date_range(weekdays: list[int], days: int):
     '''date iterator'''
     now = datetime.now().date()
     end = now + relativedelta(days=days)
@@ -46,11 +46,11 @@ def date_to_weekname(date: str):
 
 def main():
     base_url: str = os.environ['BASE_URL']
-    stadium_ids: list[int] = json.loads(os.environ['STADIUM_IDS'])
-    weekdays: set[int] = {1, 2, 3}  # 화요일, 수요일, 목요일
-    days: int = 60
-    start_t: str = '20:00:00'
     slack_webhook: str = os.environ['SLACK_WEBHOOK']
+    stadium_ids: list[int] = json.loads(os.environ['STADIUM_IDS'])
+    weekdays: list[int] = json.loads(os.environ['WEEKDAYS'])
+    days: str = int(os.environ['DAYS'])
+    start_t: str = os.environ['START_T']
 
     helper = PlabHelper(base_url)
     slack = Slack(url=slack_webhook,
@@ -86,7 +86,7 @@ def main():
             if sched['stadium_name']:
                 stadium_full_name += ' - ' + sched['stadium_name']
             text = f'{stadium_full_name} - {sched["date"]} ({sched["weekname"]}) '
-            text = f'- <{sched["order"]}|{text}>'
+            text = f'• <{sched["order"]}|{text}>'
             msgbuilder.append(text)
 
         candidates = ', '.join(stadium_id2name.values())
