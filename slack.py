@@ -51,7 +51,7 @@ class Slack:
             'title': title,
             'title_link': title_link,
             'footer': f'{socket.gethostname()}:{os.getcwd()}' if with_hostname
-                else None,
+            else None,
         }
 
         payload = {
