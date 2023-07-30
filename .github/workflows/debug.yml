@@ -26,5 +26,8 @@ jobs:
         SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
         BASE_URL: ${{ secrets.BASE_URL }}
         STADIUM_IDS: ${{ secrets.STADIUM_IDS }}
+        WEEKDAYS: ${{ vars.WEEKDAYS }}
+        DAYS: ${{ vars.DAYS }}
+        START_T: ${{ vars.START_T }}
       run: |
         python test.py
