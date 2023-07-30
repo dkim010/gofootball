@@ -5,14 +5,14 @@ from slack import Slack
 
 SLACK_WEBHOOK = os.environ['SLACK_WEBHOOK']
 BASE_URL = os.environ['BASE_URL']
-STADIUM_GROUP = os.environ['STADIUM_GROUP']
+STADIUM_IDS = os.environ['STADIUM_IDS']
 
 
 def main():
     title = '테스트메시지'
     text = []
     text.append(f'{BASE_URL=}')
-    text.append(f'{STADIUM_GROUP=}')
+    text.append(f'{STADIUM_IDS=}')
     text.append(f'{SLACK_WEBHOOK=}')
     text = '\n'.join(text)
     print(text)
