@@ -1,21 +1,17 @@
 # pylint:disable=missing-timeout,invalid-name
 from __future__ import annotations
-import os
-from pprint import pprint
+
 import json
+import os
+import time
 from datetime import datetime
+from pprint import pprint
+
+import dateutil.parser
 from dateutil.relativedelta import relativedelta
-import dateutil
 
-from slack import Slack
 from plab_helper import PlabHelper
-
-
-SLACK_WEBHOOK = os.environ['SLACK_WEBHOOK']
-BASE_URL = os.environ['BASE_URL']
-STADIUM_IDS = json.loads(os.environ['STADIUM_IDS'])
-WEEKDAYS = {1, 2, 3} # 화요일, 수요일, 목요일
-START_TIME = '20:00'
+from slack import Slack
 
 
 def date_range(weekdays, days=60):
@@ -46,7 +42,7 @@ def get_weekname(dt):
 def main():
     base_url: str = os.environ['BASE_URL']
     stadium_ids: list[int] = json.loads(os.environ['STADIUM_IDS'])
-    weekdays: set[int] = {1, 2, 3} # 화요일, 수요일, 목요일
+    weekdays: set[int] = {1, 2, 3}  # 화요일, 수요일, 목요일
     start_t: str = '20:00:00'
     slack_webhook: str = os.environ['SLACK_WEBHOOK']
 
@@ -65,6 +61,7 @@ def main():
                                               date=date,
                                               start_t=start_t)
             schedules.extend(_schedules)
+            time.sleep(2)
 
     # translate
     for sched in schedules:

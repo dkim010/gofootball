@@ -2,7 +2,6 @@ import os
 
 from slack import Slack
 
-
 SLACK_WEBHOOK = os.environ['SLACK_WEBHOOK']
 BASE_URL = os.environ['BASE_URL']
 STADIUM_IDS = os.environ['STADIUM_IDS']

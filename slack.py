@@ -1,21 +1,26 @@
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
+# pylint:disable=missing-timeout,unused-import,invalid-name
 from __future__ import print_function
+
+import json
 import os
-from datetime import datetime
-import traceback
 import socket
-import requests, json
+import traceback
+from datetime import datetime
+
+import requests
+
 try:
-    from urllib.parse import urljoin
-    from urllib.parse import urlencode
     import urllib.request as urlrequest
+    from urllib.parse import urlencode, urljoin
 except ImportError:
-    from urlparse import urljoin
     from urllib import urlencode
+
     import urllib2 as urlrequest
+    from urlparse import urljoin
 
 
-class Slack(object):
+class Slack:
     def __init__(self, url, stamp='', title='', **kwargs):
         self.url = url
         self.stamp = stamp
@@ -25,9 +30,10 @@ class Slack(object):
         self.last_sended = 0.
 
     def _send(self, payload):
-        headers = {'content-type': 'application/json', 'Accept-Charset': 'UTF-8'}
+        headers = {'content-type': 'application/json',
+                   'Accept-Charset': 'UTF-8'}
         data = json.dumps(payload)
-        r = requests.post(self.url, data=data.encode('utf-8'), headers=headers)
+        _ = requests.post(self.url, data=data.encode('utf-8'), headers=headers)
 
     def send(self, title, text, color, title_link=None, with_hostname=True):
         # attachment
@@ -44,9 +50,9 @@ class Slack(object):
             'color': color,
             'title': title,
             'title_link': title_link,
-            'footer': '{}:{}'.format(socket.gethostname(), os.getcwd()) if with_hostname \
-                      else None,
-            }
+            'footer': f'{socket.gethostname()}:{os.getcwd()}' if with_hostname
+                else None,
+        }
 
         payload = {
             'attachments': [attachment],
@@ -62,5 +68,5 @@ class Slack(object):
             try:
                 self.send(title, text, color)
                 self.last_sended = current
-            except Exception as e:
+            except Exception:
                 traceback.print_exc()
