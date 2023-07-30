@@ -26,9 +26,7 @@ def date_range(weekdays, days):
             yield str(that)
         that += relativedelta(days=1)
 
-
-def get_weekname(dt):
-    '''get korean weekname'''
+def get_weekname(weekday: int):
     weeknames = {
         0: '월요일',
         1: '화요일',
@@ -38,7 +36,12 @@ def get_weekname(dt):
         5: '토요일',
         6: '일요일',
     }
-    return weeknames[dateutil.parser.parse(dt).weekday()]
+    return weeknames[weekday]
+
+
+def date_to_weekname(date: str):
+    '''get korean weekname'''
+    return get_weekname(dateutil.parser.parse(date).weekday())
 
 
 def main():
@@ -72,7 +75,7 @@ def main():
 
         # translate
         for sched in schedules:
-            sched['weekname'] = get_weekname(sched['date'])
+            sched['weekname'] = date_to_weekname(sched['date'])
             sched['order'] = helper.get_order_url(sched['product_id'])
         pprint(schedules)
 
