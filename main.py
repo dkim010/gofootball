@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import json
 import os
+import random
 import time
 import traceback
 from datetime import datetime
@@ -66,7 +67,7 @@ def main():
                                                   date=date,
                                                   start_t=start_t)
                 schedules.extend(_schedules)
-                time.sleep(2)
+                time.sleep(random.randint(1, 5))
 
         # translate
         for sched in schedules:
