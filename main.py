@@ -87,7 +87,8 @@ def main():
             stadium_full_name = sched['stadium_group_name']
             if sched['stadium_name']:
                 stadium_full_name += ' - ' + sched['stadium_name']
-            text = f'{stadium_full_name} - {sched["date"]} ({sched["weekname"]}) '
+            text = f'{stadium_full_name} - {sched["date"]} ' \
+                   f'({sched["weekname"]} {sched["start_t"][:5]}) '
             text = f'• <{sched["order"]}|{text}>'
             msgbuilder.append(text)
 
