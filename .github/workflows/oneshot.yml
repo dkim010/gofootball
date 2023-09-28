@@ -28,6 +28,6 @@ jobs:
         STADIUM_IDS: ${{ secrets.STADIUM_IDS }}
         WEEKDAYS: ${{ vars.WEEKDAYS }}
         DAYS: ${{ vars.DAYS }}
-        START_T: ${{ vars.START_T }}
+        START_TIME_LIST: ${{ vars.START_TIME_LIST }}
       run: |
         python main.py
