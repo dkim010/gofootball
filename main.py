@@ -50,7 +50,7 @@ def main():
     stadium_ids: list[int] = json.loads(os.environ['STADIUM_IDS'])
     weekdays: list[int] = json.loads(os.environ['WEEKDAYS'])
     days: str = int(os.environ['DAYS'])
-    start_t: str = os.environ['START_T']
+    start_time_list: list[str] = json.loads(os.environ['START_TIME_LIST'])
 
     helper = PlabHelper(base_url)
     slack = Slack(url=slack_webhook,
@@ -67,9 +67,11 @@ def main():
         schedules = []
         for stadium_id in stadium_ids:
             for date in date_range(weekdays, days):
-                _schedules = helper.get_schedules(stadium_id=stadium_id,
-                                                  date=date,
-                                                  start_t=start_t)
+                _schedules = helper.get_schedules(
+                    stadium_id=stadium_id,
+                    date=date,
+                    start_time_list=start_time_list,
+                )
                 schedules.extend(_schedules)
                 time.sleep(random.randint(1, 5))
 
@@ -91,7 +93,7 @@ def main():
 
         candidates = ', '.join(stadium_id2name.values())
         weeknames = ', '.join([get_weekname(weekday) for weekday in weekdays])
-        title = f'앞으로 {days}일 간 {weeknames} {start_t}에 ' \
+        title = f'앞으로 {days}일 간 {weeknames} {start_time_list}에 ' \
                 f'예약 가능한 구장 일정 ({candidates})'
         text = '\n'.join(msgbuilder)
         slack.send(title, text, color='good', with_hostname=False)
