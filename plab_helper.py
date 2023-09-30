@@ -13,7 +13,7 @@ class PlabHelper:
     def _get_stadium_info(self, stadium_id: int) -> dict:
         """just for testing"""
         url = f'{self.base_url}/api/v2/stadium-groups/{stadium_id}/'
-        res = requests.get(url, verify=False, timeout=10)
+        res = requests.get(url, verify=False, timeout=30)
         res.raise_for_status()
         return res.json()
 
@@ -31,7 +31,7 @@ class PlabHelper:
     ) -> dict[str, any]:
         """get schedules for the stadium"""
         url = f'{self.base_url}/api/v2/stadium-groups/{stadium_id}/products/?date={date}'
-        res = requests.get(url, verify=False, timeout=10)
+        res = requests.get(url, verify=False, timeout=30)
         res.raise_for_status()
         res_json = res.json()
         schedules = []
