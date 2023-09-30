@@ -103,6 +103,7 @@ def main():
         title = str(err)
         slack.send(title, traceback.format_exc(), color='danger',
                    with_hostname=False)
+        raise err
 
 
 if __name__ == '__main__':
