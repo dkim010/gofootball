@@ -27,7 +27,7 @@ class PlabHelper:
         self,
         stadium_id: int,
         date: str,
-        start_time_list: list[str],
+        start_time_range: list[str],
     ) -> dict[str, any]:
         """get schedules for the stadium"""
         url = f'{self.base_url}/api/v2/stadium-groups/{stadium_id}/products/?date={date}'
@@ -42,7 +42,9 @@ class PlabHelper:
             stadium_id = stadium['id']
             stadium_name = stadium['name']
             for product in stadium['products']:
-                if product['start_t'] not in start_time_list:
+                if product['start_t'] < start_time_range[0]:
+                    continue
+                if product['start_t'] >= start_time_range[1]:
                     continue
                 if product['product_status'] == 'SOLDOUT':
                     continue

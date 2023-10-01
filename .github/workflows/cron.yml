@@ -30,9 +30,9 @@ jobs:
       env: 
         SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
         BASE_URL: ${{ secrets.BASE_URL }}
-        STADIUM_IDS: ${{ secrets.STADIUM_IDS }}
+        STADIUM_IDS: ${{ vars.STADIUM_IDS }}
         WEEKDAYS: ${{ vars.WEEKDAYS }}
         DAYS: ${{ vars.DAYS }}
-        START_TIME_LIST: ${{ vars.START_TIME_LIST }}
+        START_TIME_RANGE: ${{ vars.START_TIME_RANGE }}
       run: |
         python main.py
